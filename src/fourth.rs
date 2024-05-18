@@ -1,6 +1,7 @@
-// 5 安全实现双链表
+// 5 安全实现双链表（双端队列）
 // 非常繁琐
 // 用了内部可变模式
+// 对于实现一个库而言，运行时安全才是最重要的，用RefCell只会增加运行时错误的风险
 
 // Cell系列
 // Cell只是一层包裹，而非Rc、Box那样的指向堆的指针，所以不能直接用Cell代替Box
@@ -43,8 +44,6 @@ struct Node<T> {
 }
 
 pub struct IntoIter<T>(List<T>);
-
-pub struct Iter<T>(Option<Rc<Node<T>>>);
 
 impl<T> Node<T> {
     fn new(elem: T) -> Rc<RefCell<Self>> {
@@ -141,11 +140,6 @@ impl<T> List<T> {
     pub fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
         self.head.as_ref().map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.elem))
     }
-
-    pub fn iter(&self) -> Iter<T> {
-        // Iter(self.head.as_ref().map(|head| head.clone()))
-        unimplemented!()
-    }
 }
 
 impl<T> IntoIterator for List<T> {
@@ -170,9 +164,6 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
         self.0.pop_back()
     }
 }
-
-// impl<T> Iterator for Iter<T> {
-//     type Item =
 
 impl<T> Drop for List<T> {
     fn drop(&mut self) {
